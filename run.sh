@@ -1,8 +1,22 @@
 #!/bin/bash
+set -e
 
 # --- Configuración Interactiva ---
 # Se ha modificado este script para que sea interactivo y utilice los archivos del proyecto actual
 # en lugar de clonar un nuevo repositorio, para así preservar tus cambios (como la configuración de Nginx).
+
+# Función para comprobar si un comando existe
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Comprobar si Docker y Docker Compose están instalados
+if ! command_exists docker || (! command_exists docker-compose && ! docker compose version >/dev/null 2>&1); then
+  echo "Error: Docker y/o Docker Compose no están instalados o no se encuentran en el PATH."
+  echo "Por favor, instálalos antes de ejecutar este script."
+  exit 1
+fi
+
 
 # Preguntar por el puerto para Nginx
 read -p "Introduce el puerto para acceder a Odoo a través de Nginx (ej. 8080): " PORT
@@ -61,6 +75,9 @@ find $DESTINATION -type f -exec chmod 644 {} \;
 find $DESTINATION -type d -exec chmod 755 {} \;
 
 chmod +x $DESTINATION/entrypoint.sh
+chmod +x $DESTINATION/run.sh
+chmod +x $DESTINATION/stop.sh
+
 
 # Run Odoo
 if ! is_present="$(type -p "docker-compose")" || [[ -z $is_present ]]; then
