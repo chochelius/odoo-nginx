@@ -1,0 +1,45 @@
+version: '2'
+services:
+  db:
+    image: postgres:17
+    user: root
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo18@2024
+      - POSTGRES_DB=postgres
+    restart: always             # run as a service
+    volumes:
+        - ./postgresql:/var/lib/postgresql/data
+
+  odoo18:
+    image: odoo:18
+    user: root
+    depends_on:
+      - db
+    tty: true
+    command: --
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo18@2024
+      - PIP_BREAK_SYSTEM_PACKAGES=1
+      - PROXY_MODE=True # Importante para que Odoo funcione detrás de un proxy
+    volumes:
+      #- /etc/timezone:/etc/timezone:ro
+      #- /etc/localtime:/etc/localtime:ro
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./addons:/mnt/extra-addons
+      - ./etc:/etc/odoo
+    restart: always             # run as a service
+
+  nginx:
+    image: nginx:latest
+    container_name: odoo_nginx
+    depends_on:
+      - odoo18
+    ports:
+      - "80:80" # Puerto HTTP estándar, puedes cambiar el puerto del host si es necesario (ej. "8080:80")
+    volumes:
+      - ./nginx/odoo.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/logs:/var/log/nginx # Volumen para los logs de Nginx
+    restart: always
