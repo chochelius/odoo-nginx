@@ -1,1 +1,20 @@
 postgresql/
+
+# Log files
+nginx/logs/*.log
+etc/odoo-server.log
+
+# Certbot
+certbot/
+
+# Nginx certificates
+nginx/certs/
+nginx/private/
+
+# Odoo filestore and sessions
+etc/filestore/
+etc/sessions/
+
+# NPM lock file
+package-lock.json
+
